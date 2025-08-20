@@ -438,18 +438,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 20c67772b30d4424b1e9d754d5f73238, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _upgradeZoneControllers:
-  - {fileID: 0}
-  _wheatBlockEntity: {fileID: 6067158907229441780, guid: b2169e7e7106dd746b3f51f4d05b7d5a, type: 3}
-  _wheatTrunkEntity: {fileID: 8959004758365115252, guid: 97d2178f32d458d4cba194cd918e3306, type: 3}
   _uiConfig: {fileID: 11400000, guid: 76c6525e56f324e419e70fff786b378a, type: 2}
-  _cameraConfig: {fileID: 11400000, guid: 7bc7248ef03061648a000937c6ad2e45, type: 2}
-  _characterConfig: {fileID: 11400000, guid: 6c603c07914f87943b3c14c7955b935f, type: 2}
-  _inputConfig: {fileID: 11400000, guid: f9ad1bba0f367d84aa8b5b4ed0b63eb3, type: 2}
-  _animationConfig: {fileID: 11400000, guid: 01899c567fa233f409044d86e37dd0ac, type: 2}
-  _inventoryConfig: {fileID: 11400000, guid: 961a1b2928d1bc5478f772e1f564e4f5, type: 2}
-  _priceConfig: {fileID: 11400000, guid: 04bd656d7bfd1024f9fbec81f585838e, type: 2}
-  _upgradeConfig: {fileID: 11400000, guid: b204e0ec3929af146b869529d70132b5, type: 2}
 --- !u!81 &356289009596870998
 AudioListener:
   m_ObjectHideFlags: 0
