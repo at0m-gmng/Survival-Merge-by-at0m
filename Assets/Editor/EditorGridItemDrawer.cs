@@ -121,11 +121,22 @@ namespace GameResources.Features.EditorGridDrawled
                         CellType currentCell = (CellType)element.intValue;
 
                         Color originalColor = GUI.color;
-                        GUI.color = currentCell == CellType.Empty ? Color.green : Color.red;
+                        switch (element.intValue)
+                        {
+                            case 0:
+                                GUI.color = Color.green;
+                                break;
+                            case 1:
+                                GUI.color = Color.red;
+                                break;
+                            case 2:
+                                GUI.color = Color.yellow;
+                                break;
+                        }
                     
                         if (GUI.Button(cellRect, currentCell.ToString()))
                         {
-                            element.intValue = 1 - element.intValue;
+                            element.intValue = GetNextElement(element.intValue, 1, 0, 2);
                         }
                     
                         GUI.color = originalColor;
@@ -136,6 +147,11 @@ namespace GameResources.Features.EditorGridDrawled
             {
                 Debug.LogError($"EditorGridItemDrawer: {exception}");
             }
+        }
+        private int GetNextElement(int current, int add, int min, int max)
+        {
+            int range = max - min + 1;
+            return min + ((current - min + add) % range + range) % range;
         }
     }
 }

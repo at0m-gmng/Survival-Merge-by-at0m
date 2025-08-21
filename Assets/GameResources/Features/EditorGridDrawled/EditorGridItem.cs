@@ -52,6 +52,7 @@ namespace GameResources.Features.EditorGridDrawled
     public enum CellType
     {
         Empty = 0, 
-        Busy = 1
+        Busy = 1,
+        Center = 2
     }
 }
