@@ -20,8 +20,9 @@
                 {
                     foreach (ItemData data in _inventoryView.Inventory.BaseItems)
                     {
-                        Wrapper<CellType>[] shape = data.TryGetItemSize();
-                        _inventoryView.TryPlaceItem(data.UIPrefab, shape);
+                        ItemView createdItemView = Instantiate(data.UIPrefab, _inventoryView.ItemParent);
+                        createdItemView.Initialize(data);
+                        _inventoryView.TryPlaceItem(createdItemView);
                     }
                 })
                 .AddTo(_disposables);

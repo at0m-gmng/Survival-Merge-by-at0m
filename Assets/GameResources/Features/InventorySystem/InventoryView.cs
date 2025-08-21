@@ -28,8 +28,9 @@ namespace GameResources.Features.InventorySystem
             _initialized.Value = true;
         }
 
-        public bool TryPlaceItem(ItemView prefab, Wrapper<CellType>[] shape)
+        public bool TryPlaceItem(ItemView prefab)
         {
+            Wrapper<CellType>[] shape = prefab.ItemData.TryGetItemSize();
             if (shape != null && shape.Length != 0)
             {
                 if (TryFindPosition(shape, out int posRow, out int posCol))
@@ -50,8 +51,7 @@ namespace GameResources.Features.InventorySystem
 
                     Vector3 worldCenter = GetCellCenterWorld(centerRow, centerCol);
 
-                    ItemView created = Instantiate(prefab, ItemParent);
-                    RectTransform rect = created.GetComponent<RectTransform>();
+                    RectTransform rect = prefab.GetComponent<RectTransform>();
                     rect.pivot = pivot;
                     rect.sizeDelta = new Vector2(shapeCols * GridLayout.cellSize.x, shapeRows * GridLayout.cellSize.y);
                     rect.position = worldCenter;
@@ -122,7 +122,11 @@ namespace GameResources.Features.InventorySystem
                 for (int j = 0; j <= invCols - shapeCols; j++)
                 {
                     if (CanPlaceAt(shape, i, j))
-                    { posRow = i; posCol = j; return true; }
+                    {
+                        posRow = i; 
+                        posCol = j;
+                        return true;
+                    }
                 }
             }
 
@@ -137,8 +141,7 @@ namespace GameResources.Features.InventorySystem
                 int sc = shape[si].Values.Length;
                 for (int sj = 0; sj < sc; sj++)
                 {
-                    if (shape[si].Values[sj] != CellType.Empty &&
-                        _cellWrappers[posRow + si][posCol + sj].Values[0] != CellType.Empty)
+                    if (shape[si].Values[sj] != CellType.Empty && _cellWrappers[posRow + si][posCol + sj].Values[0] != CellType.Empty)
                     {
                         return false;
                     }
@@ -191,6 +194,7 @@ namespace GameResources.Features.InventorySystem
             Vector3 local = new Vector3(x, y, 0f);
             return GridLayout.transform.TransformPoint(local);
         }
+        
         private void DebugOccupiedCells(Wrapper<CellType>[] shape, int startRow, int startCol)
         {
             for (int i = 0; i < shape.Length; i++)
