@@ -8,7 +8,7 @@ namespace GameResources.Features.InventorySystem.Data
         [Header("Grid size")]
         [field: SerializeField] public int Columns { get; private set; } = default;
         [field: SerializeField] public int Rows { get; private set; } = default;
-        [field: SerializeField] public GameObject CellPrefab { get; private set; } = default;
+        [field: SerializeField] public RectTransform CellPrefab { get; private set; } = default;
         
         [Header("Base Items")]
         [field: SerializeField] public  ItemData[] BaseItems { get; private set; } = default;

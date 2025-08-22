@@ -1,5 +1,6 @@
 ﻿namespace GameResources.Features.InventorySystem.Example
 {
+    using Cysharp.Threading.Tasks;
     using Data;
     using UniRx;
     using UnityEngine;
@@ -17,25 +18,23 @@
             _inventoryView.Initialized
                 .Where(v => v)
                 .Take(1)
-                .Subscribe(_ =>
+                .Subscribe(async _ =>
                 {
                     if (_isLoad)
                     {
-                        foreach (ItemData data in _inventoryView.Inventory.BaseItems)
-                        {
-                            ItemView createdItemView = Instantiate(data.UIPrefab, _inventoryView.ItemParent);
-                            createdItemView.Initialize(data, _inventoryView);
-                            _inventoryView.TryPlaceItem(createdItemView);
-                        }
-                    }
-                    else
-                    {
-                        
+                        await UniTask.Delay(100);
                         foreach (ItemData data in _inventoryView.Inventory.BaseItems)
                         {
                             ItemView createdItemView = Instantiate(data.UIPrefab, _itemsParent);
                             createdItemView.Initialize(data, _inventoryView);
+                            _inventoryView.TryAutoPlaceItem(createdItemView);
                         }
+                    }
+                    
+                    foreach (ItemData data in _inventoryView.Inventory.BaseItems)
+                    {
+                        ItemView createdItemView = Instantiate(data.UIPrefab, _itemsParent);
+                        createdItemView.Initialize(data, _inventoryView);
                     }
                 })
                 .AddTo(_disposables);

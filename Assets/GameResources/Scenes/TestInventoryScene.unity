@@ -667,6 +667,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <Inventory>k__BackingField: {fileID: 11400000, guid: 3e3c4d61156b3844e859e41d94573904, type: 2}
   <GridLayout>k__BackingField: {fileID: 1192976941}
+  <GridLayoutRect>k__BackingField: {fileID: 1192976939}
   <ItemParent>k__BackingField: {fileID: 880168335}
   <OutsideParent>k__BackingField: {fileID: 529191073}
 --- !u!114 &1192976943
@@ -695,7 +696,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ef0433ae37084cde8c39fe6e1b016497, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _isLoad: 0
+  _isLoad: 1
   _inventoryView: {fileID: 1192976942}
   _itemsParent: {fileID: 529191073}
 --- !u!1001 &1228832188
