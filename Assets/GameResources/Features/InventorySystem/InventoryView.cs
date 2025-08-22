@@ -70,7 +70,6 @@
 
             int targetRow = -1, targetCol = -1;
             float minDistSq = 0.025f * (GridLayout.cellSize.x * GridLayout.cellSize.x + GridLayout.cellSize.y * GridLayout.cellSize.y);
-            List<Vector2Int> targetCells = new List<Vector2Int>();
 
             for (int i = 0; i < _cellObjects.Count; i++)
             {
@@ -82,7 +81,7 @@
                     float distSq = dx * dx + dy * dy;
                     if (distSq < minDistSq)
                     {
-                        targetCells.Add(new Vector2Int(i, j));
+                        minDistSq = distSq;
                         targetRow = i;
                         targetCol = j;
                     }
@@ -95,38 +94,33 @@
             }
             
             Vector2Int shapeCenter = GetItemCenter(shape);
-            int startRow = 0;
-            int startCol = 0;
             
-            for (int k = 0; k < targetCells.Count; k++)
+            int startRow = targetRow - shapeCenter.x;
+            int startCol = targetCol - shapeCenter.y;
+            
+            for (int i = 0; i < shape.Length; i++)
             {
-                startRow = targetCells[k].x - shapeCenter.x;
-                startCol = targetCells[k].y - shapeCenter.y;
-                
-                for (int i = 0; i < shape.Length; i++)
+                for (int j = 0; j < shape[i].Values.Length; j++)
                 {
-                    for (int j = 0; j < shape[i].Values.Length; j++)
+                    if (shape[i].Values[j] != CellType.Empty)
                     {
-                        if (shape[i].Values[j] != CellType.Empty)
+                        int checkRow = startRow + i;
+                        if (checkRow < 0 || checkRow >= _cellWrappers.Count)
                         {
-                            int checkRow = startRow + i;
-                            if (checkRow < 0 || checkRow >= _cellWrappers.Count)
-                            {
-                                Debug.Log($"[IsAvailablePlaceByCenter] Выход за границы по строке: {checkRow}. target={targetRow},{targetCol} start={startRow},{startCol} shapeIndex={i},{j}");
-                                return false;
-                            }
+                            Debug.Log($"[IsAvailablePlaceByCenter] Выход за границы по строке: {checkRow}. target={targetRow},{targetCol} start={startRow},{startCol} shapeIndex={i},{j}");
+                            return false;
+                        }
 
-                            int colsInRow = _cellWrappers[checkRow].Count;
-                            int checkCol = startCol + j;
-                            if ((checkCol < 0 || checkCol >= colsInRow) || (_cellWrappers[checkRow][checkCol].Values[0] != CellType.Empty))
-                            {
-                                return false;
-                            }
+                        int colsInRow = _cellWrappers[checkRow].Count;
+                        int checkCol = startCol + j;
+                        if ((checkCol < 0 || checkCol >= colsInRow) || (_cellWrappers[checkRow][checkCol].Values[0] != CellType.Empty))
+                        {
+                            return false;
                         }
                     }
                 }
-
             }
+
 
             return true;
         }

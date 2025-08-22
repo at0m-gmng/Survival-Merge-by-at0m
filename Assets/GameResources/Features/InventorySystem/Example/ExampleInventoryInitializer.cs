@@ -22,7 +22,7 @@
                 {
                     if (_isLoad)
                     {
-                        await UniTask.Delay(100);
+                        await UniTask.Delay(50);
                         foreach (ItemData data in _inventoryView.Inventory.BaseItems)
                         {
                             ItemView createdItemView = Instantiate(data.UIPrefab, _itemsParent);
