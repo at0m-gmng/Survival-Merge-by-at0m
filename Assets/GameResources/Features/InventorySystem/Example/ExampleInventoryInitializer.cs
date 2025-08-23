@@ -25,16 +25,16 @@
                         await UniTask.Delay(50);
                         foreach (ItemData data in _inventoryView.Inventory.BaseItems)
                         {
-                            ItemView createdItemView = Instantiate(data.UIPrefab, _itemsParent);
-                            createdItemView.Initialize(data, _inventoryView);
+                            ItemView createdItemView = Instantiate(data.Item.UIPrefab, _itemsParent);
+                            createdItemView.Initialize(data.Item, _inventoryView);
                             _inventoryView.TryAutoPlaceItem(createdItemView);
                         }
                     }
                     
                     foreach (ItemData data in _inventoryView.Inventory.BaseItems)
                     {
-                        ItemView createdItemView = Instantiate(data.UIPrefab, _itemsParent);
-                        createdItemView.Initialize(data, _inventoryView);
+                        ItemView createdItemView = Instantiate(data.Item.UIPrefab, _itemsParent);
+                        createdItemView.Initialize(data.Item, _inventoryView);
                     }
                 })
                 .AddTo(_disposables);

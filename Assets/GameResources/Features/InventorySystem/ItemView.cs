@@ -7,7 +7,7 @@
 
     public class ItemView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
     {
-        public virtual ItemData ItemData { get; private set; } = null;
+        public virtual BaseItem ItemData { get; private set; } = null;
         public string ID { get; private set; } = string.Empty;
 
         [field: SerializeField] public RectTransform Rect { get; private set; } = default;
@@ -17,7 +17,7 @@
         private Vector3 _startPosition;
         private Transform _startParent;
         
-        public void Initialize(ItemData itemData, InventoryView inventoryView)
+        public void Initialize(BaseItem itemData, InventoryView inventoryView)
         {
             ItemData = itemData;
             _inventoryView = inventoryView;

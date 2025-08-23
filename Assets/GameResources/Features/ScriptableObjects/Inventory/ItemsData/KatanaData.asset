@@ -12,21 +12,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7588dcc497b77154ca0be7a9d907b048, type: 3}
   m_Name: KatanaData
   m_EditorClassIdentifier: 
-  <Id>k__BackingField: 70150094196363841ba43508d166269a
-  <DisplayName>k__BackingField: Bow
-  <Description>k__BackingField: Bow
-  <UIPrefab>k__BackingField: {fileID: 1327997638166509237, guid: fd33a812688b0a941ae26b282e9adf6b, type: 3}
-  <WorldPrefab>k__BackingField: {fileID: 0}
-  _grid:
-  - Values: 01000000
-  - Values: 02000000
-  - Values: 01000000
-  _editorGrid:
-    _rows: 3
-    _columns: 1
-    _cellSize: 2
-    _grid:
+  <Item>k__BackingField:
+    <Id>k__BackingField: 70150094196363841ba43508d166269a
+    <DisplayName>k__BackingField: Katana
+    <Description>k__BackingField: Katana
+    <UIPrefab>k__BackingField: {fileID: 1327997638166509237, guid: fd33a812688b0a941ae26b282e9adf6b, type: 3}
+    <WorldPrefab>k__BackingField: {fileID: 0}
+    <Grid>k__BackingField:
     - Values: 01000000
     - Values: 02000000
     - Values: 01000000
-  <IsRotatable>k__BackingField: 1
+    <EditorGrid>k__BackingField:
+      _rows: 3
+      _columns: 1
+      _cellSize: 2
+      _grid:
+      - Values: 01000000
+      - Values: 02000000
+      - Values: 01000000
+    <IsRotatable>k__BackingField: 1

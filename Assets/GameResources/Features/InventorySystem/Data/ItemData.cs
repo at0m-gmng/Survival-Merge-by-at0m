@@ -1,11 +1,51 @@
 namespace GameResources.Features.InventorySystem.Data
 {
+    using System;
     using EditorGridDrawled;
     using UnityEngine;
 
     [CreateAssetMenu(menuName = "Inventory/ItemData", fileName = "ItemData")]
     public class ItemData : ScriptableObject
     {
+        [field: SerializeField] public BaseItem Item { get; private set; } = null;
+
+        private string _id = default;
+        
+#if UNITY_EDITOR
+        
+        private void OnValidate()
+        {
+            if (Item == null)
+            {
+                string path = UnityEditor.AssetDatabase.GetAssetPath(this);
+                if (!string.IsNullOrEmpty(path))
+                {
+                    _id = UnityEditor.AssetDatabase.AssetPathToGUID(path);
+                }
+                else
+                {
+                    _id = Guid.NewGuid().ToString();
+                }
+                Item = new BaseItem(_id);
+            }
+
+            if (Item != null)
+            {
+                Item.Grid = Item.EditorGrid.GetGrid();
+                UnityEditor.EditorUtility.SetDirty(this);
+            }
+        }
+#endif
+    }
+    
+    [Serializable]
+    public class BaseItem
+    {
+        public BaseItem(string id)
+        {
+            Id = id;
+        }
+        
         [Header("Identity")]
         [field: SerializeField] public string Id { get; private set; } = default;
         [field: SerializeField] public string DisplayName { get; private set; } = default;
@@ -16,45 +56,24 @@ namespace GameResources.Features.InventorySystem.Data
         [field: SerializeField] public ItemView WorldPrefab { get; private set; } = default;
 
         [Header("Options")]
-        [SerializeField] private Wrapper<CellType>[] _grid = default;
+        [field: SerializeField] public Wrapper<CellType>[] Grid { get; set; } = default;
 #if UNITY_EDITOR
         [Header("Editor Helpful Grid")]
-        [SerializeField] private EditorGridItem _editorGrid = new EditorGridItem();
+        [field: SerializeField] public EditorGridItem EditorGrid { get; private set; } = new EditorGridItem();
 #endif
         [field: SerializeField] public bool IsRotatable { get; private set; } = true;
 
         public Wrapper<CellType>[] TryGetItemSize()
         {
 #if !UNITY_EDITOR
-            return _grid;
+            return Grid;
 #else
-            return _editorGrid.GetGrid();
+            return EditorGrid.GetGrid();
 #endif
         }
    
 #if UNITY_EDITOR
-        public CellType[,] GetGridMatrix() => _editorGrid.GetGridMatrix();
-#endif
-   
-#if UNITY_EDITOR
-        
-        private void OnValidate()
-        {
-            UnityEditor.EditorUtility.SetDirty(this);
-            _grid = _editorGrid.GetGrid();
-            if (string.IsNullOrEmpty(Id) || string.IsNullOrWhiteSpace(Id))
-            {
-                string path = UnityEditor.AssetDatabase.GetAssetPath(this);
-                if (!string.IsNullOrEmpty(path))
-                {
-                    Id = UnityEditor.AssetDatabase.AssetPathToGUID(path);
-                }
-                else
-                {
-                    Id = System.Guid.NewGuid().ToString();
-                }
-            }
-        }
+        public CellType[,] GetGridMatrix() => EditorGrid.GetGridMatrix();
 #endif
     }
 }

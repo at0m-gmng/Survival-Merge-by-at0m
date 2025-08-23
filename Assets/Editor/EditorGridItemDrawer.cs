@@ -5,6 +5,9 @@ using UnityEngine;
 
 namespace GameResources.Features.EditorGridDrawled
 {
+    using System.Collections;
+    using System.Reflection;
+
     [CustomPropertyDrawer(typeof(EditorGridItem))]
     public sealed class EditorGridItemDrawer : PropertyDrawer
     {
@@ -74,7 +77,7 @@ namespace GameResources.Features.EditorGridDrawled
 
             if (_gridProperty == null || !_gridProperty.isArray || _gridProperty.arraySize != rows)
             {
-                EditorGridItem editorGridItem = fieldInfo.GetValue(property.serializedObject.targetObject) as EditorGridItem;
+                EditorGridItem editorGridItem = fieldInfo.GetValue(GetParentValue(property)) as EditorGridItem;
                 editorGridItem?.ResetGrid();
                 return;
             }
@@ -152,6 +155,53 @@ namespace GameResources.Features.EditorGridDrawled
         {
             int range = max - min + 1;
             return min + ((current - min + add) % range + range) % range;
+        }
+        
+        public static object GetParentValue(SerializedProperty property)
+        {
+            object obj = property.serializedObject.targetObject;
+            string path = property.propertyPath.Replace(".Array.data[", "[");
+            string[] elements = path.Split('.');
+            foreach (string element in elements[..^1])
+            {
+                if (element.Contains("["))
+                {
+                    string elementName = element[..element.IndexOf("[")];
+                    int index = Convert.ToInt32(element[(element.IndexOf("[") + 1)..^1]);
+                    obj = GetValue(obj, elementName, index);
+                }
+                else
+                {
+                    obj = GetValue(obj, element);
+                }
+            }
+            return obj;
+        }
+
+        private static object GetValue(object source, string name)
+        {
+            if (source != null)
+            {
+                Type type = source.GetType();
+                FieldInfo field = type.GetField(name, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
+                return field?.GetValue(source);
+            }
+            return null;
+        }
+
+        private static object GetValue(object source, string name, int index)
+        {
+            IEnumerable enumerable = GetValue(source, name) as IEnumerable;
+            if (enumerable != null)
+            {
+                IEnumerator enm = enumerable.GetEnumerator();
+                for (int i = 0; i <= index; i++)
+                {
+                    enm.MoveNext();
+                }
+                return enm.Current;
+            }
+            return null;
         }
     }
 }

@@ -12,19 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7588dcc497b77154ca0be7a9d907b048, type: 3}
   m_Name: PistolData
   m_EditorClassIdentifier: 
-  <Id>k__BackingField: abfc8848c29765749a9044df858176ef
-  <DisplayName>k__BackingField: Pistol
-  <Description>k__BackingField: Pistol
-  <UIPrefab>k__BackingField: {fileID: 4057877417496409302, guid: da8ecc7c45366934496bc5fb6c5d8fee, type: 3}
-  <WorldPrefab>k__BackingField: {fileID: 0}
-  _grid:
-  - Values: 0200000001000000
-  - Values: 0100000000000000
-  _editorGrid:
-    _rows: 2
-    _columns: 2
-    _cellSize: 2
-    _grid:
+  <Item>k__BackingField:
+    <Id>k__BackingField: abfc8848c29765749a9044df858176ef
+    <DisplayName>k__BackingField: Pistol
+    <Description>k__BackingField: Pistol
+    <UIPrefab>k__BackingField: {fileID: 4057877417496409302, guid: da8ecc7c45366934496bc5fb6c5d8fee, type: 3}
+    <WorldPrefab>k__BackingField: {fileID: 0}
+    <Grid>k__BackingField:
     - Values: 0200000001000000
     - Values: 0100000000000000
-  <IsRotatable>k__BackingField: 1
+    <EditorGrid>k__BackingField:
+      _rows: 2
+      _columns: 2
+      _cellSize: 2
+      _grid:
+      - Values: 0200000001000000
+      - Values: 0100000000000000
+    <IsRotatable>k__BackingField: 1

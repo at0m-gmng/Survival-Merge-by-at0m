@@ -12,17 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7588dcc497b77154ca0be7a9d907b048, type: 3}
   m_Name: Bullet 2
   m_EditorClassIdentifier: 
-  <Id>k__BackingField: 8603d9344f92b0249b3990e6b9ff7a20
-  <DisplayName>k__BackingField: Bullet
-  <Description>k__BackingField: Bullet
-  <UIPrefab>k__BackingField: {fileID: 9095486155441931183, guid: 684318664875d894f83044c55247902e, type: 3}
-  <WorldPrefab>k__BackingField: {fileID: 0}
-  _grid:
-  - Values: 02000000
-  _editorGrid:
-    _rows: 1
-    _columns: 1
-    _cellSize: 2
-    _grid:
+  <Item>k__BackingField:
+    <Id>k__BackingField: 8603d9344f92b0249b3990e6b9ff7a20
+    <DisplayName>k__BackingField: Bullet
+    <Description>k__BackingField: Bullet
+    <UIPrefab>k__BackingField: {fileID: 9095486155441931183, guid: 684318664875d894f83044c55247902e, type: 3}
+    <WorldPrefab>k__BackingField: {fileID: 0}
+    <Grid>k__BackingField:
     - Values: 02000000
-  <IsRotatable>k__BackingField: 1
+    <EditorGrid>k__BackingField:
+      _rows: 1
+      _columns: 1
+      _cellSize: 2
+      _grid:
+      - Values: 02000000
+    <IsRotatable>k__BackingField: 1
