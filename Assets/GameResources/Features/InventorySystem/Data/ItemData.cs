@@ -1,8 +1,8 @@
-using GameResources.Features.EditorGridDrawled;
-using UnityEngine;
-
 namespace GameResources.Features.InventorySystem.Data
 {
+    using EditorGridDrawled;
+    using UnityEngine;
+
     [CreateAssetMenu(menuName = "Inventory/ItemData", fileName = "ItemData")]
     public class ItemData : ScriptableObject
     {
