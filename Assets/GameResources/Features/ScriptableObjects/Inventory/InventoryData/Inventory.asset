@@ -16,6 +16,6 @@ MonoBehaviour:
   <Rows>k__BackingField: 3
   <CellPrefab>k__BackingField: {fileID: 5629940845286139690, guid: 77fc680c2d8e2f94897221219542405e, type: 3}
   <BaseItems>k__BackingField:
+  - {fileID: 11400000, guid: 8603d9344f92b0249b3990e6b9ff7a20, type: 2}
   - {fileID: 11400000, guid: abfc8848c29765749a9044df858176ef, type: 2}
   - {fileID: 11400000, guid: 70150094196363841ba43508d166269a, type: 2}
-  - {fileID: 11400000, guid: 8603d9344f92b0249b3990e6b9ff7a20, type: 2}

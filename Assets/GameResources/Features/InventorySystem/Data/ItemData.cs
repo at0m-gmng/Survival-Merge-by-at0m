@@ -7,15 +7,14 @@ namespace GameResources.Features.InventorySystem.Data
     [CreateAssetMenu(menuName = "Inventory/ItemData", fileName = "ItemData")]
     public class ItemData : ScriptableObject
     {
-        [field: SerializeField] public BaseItem Item { get; private set; } = null;
+        [field: SerializeField] public BaseItem Item { get; private set; }
 
         private string _id = default;
         
 #if UNITY_EDITOR
-        
         private void OnValidate()
         {
-            if (Item == null)
+            if (Item.Id == default)
             {
                 string path = UnityEditor.AssetDatabase.GetAssetPath(this);
                 if (!string.IsNullOrEmpty(path))
@@ -29,43 +28,65 @@ namespace GameResources.Features.InventorySystem.Data
                 Item = new BaseItem(_id);
             }
 
-            if (Item != null)
+            Item = new BaseItem(
+                Item.Id,
+                Item.DisplayName,
+                Item.Description,
+                Item.UIPrefab,
+                Item.WorldPrefab,
+                Item.EditorGrid,
+                Item.IsRotatable
+            )
             {
-                Item.Grid = Item.EditorGrid.GetGrid();
-                UnityEditor.EditorUtility.SetDirty(this);
-            }
+                Grid = Item.EditorGrid.GetGrid()
+            };
+            UnityEditor.EditorUtility.SetDirty(this);
         }
 #endif
     }
     
     [Serializable]
-    public class BaseItem
+    public struct BaseItem
     {
-        public BaseItem(string id)
+        public BaseItem(
+            string id,
+            string displayName = default,
+            string description = default,
+            ItemView uiPrefab = default,
+            ItemView worldPrefab = default,
+            EditorGridItem editorGrid = default,
+            bool isRotatable = true)
         {
             Id = id;
+            DisplayName = displayName;
+            Description = description;
+            UIPrefab = uiPrefab;
+            WorldPrefab = worldPrefab;
+            Grid = editorGrid != null ? editorGrid.GetGrid() : default;
+            EditorGrid = editorGrid != null ? editorGrid : new EditorGridItem();
+            IsRotatable = isRotatable;
         }
         
         [Header("Identity")]
-        [field: SerializeField] public string Id { get; private set; } = default;
-        [field: SerializeField] public string DisplayName { get; private set; } = default;
-        [field: SerializeField] public string Description { get; private set; } = default;
+        [field: SerializeField] public string Id { get; private set; }
+        [field: SerializeField] public string DisplayName { get; private set; }
+        [field: SerializeField] public string Description { get; private set; }
 
         [Header("Visual")]
-        [field: SerializeField] public ItemView UIPrefab { get; private set; } = default;
-        [field: SerializeField] public ItemView WorldPrefab { get; private set; } = default;
+        [field: SerializeField] public ItemView UIPrefab { get; private set; }
+        [field: SerializeField] public ItemView WorldPrefab { get; private set; }
 
         [Header("Options")]
-        [field: SerializeField] public Wrapper<CellType>[] Grid { get; set; } = default;
+        [field: SerializeField] public Wrapper<CellType>[] Grid { get; set; }
 #if UNITY_EDITOR
         [Header("Editor Helpful Grid")]
-        [field: SerializeField] public EditorGridItem EditorGrid { get; private set; } = new EditorGridItem();
+        [field: SerializeField] public EditorGridItem EditorGrid { get; private set; }
 #endif
-        [field: SerializeField] public bool IsRotatable { get; private set; } = true;
+        [field: SerializeField] public bool IsRotatable { get; private set; }
 
         public Wrapper<CellType>[] TryGetItemSize()
         {
-#if !UNITY_EDITOR
+#if UNITY_EDITOR
             return Grid;
 #else
             return EditorGrid.GetGrid();

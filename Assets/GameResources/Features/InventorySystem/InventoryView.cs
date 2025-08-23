@@ -119,6 +119,56 @@
 
         public bool IsAvailablePlaceByCenter(ItemView itemView)
             => IsAvailablePlaceByCenter(itemView.ItemData.TryGetItemSize(), itemView.transform.position);
+        
+        public bool TryReleasePlacement(PlacementItem placement)
+        {
+            if (placement != null)
+            {
+                Vector2Int shapeCenter = GetItemCenter(placement.Shape);
+                int startItemRow = placement.ItemCenter.x - shapeCenter.x;
+                int startItemCol = placement.ItemCenter.y - shapeCenter.y;
+
+                if (AreCellsInBounds(startItemRow, startItemCol, placement.Shape))
+                {
+                    ReleaseCells(placement.Shape, startItemRow, startItemCol);
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        public bool TryRestorePlacement(PlacementItem placement)
+        {
+            if (placement != null)
+            {
+                Vector2Int shapeCenter = GetItemCenter(placement.Shape);
+                int startItemRow = placement.ItemCenter.x - shapeCenter.x;
+                int startItemCol = placement.ItemCenter.y - shapeCenter.y;
+
+                if (AreCellsInBounds(startItemRow, startItemCol, placement.Shape))
+                {
+                    for (int i = 0; i < placement.Shape.Length; i++)
+                    {
+                        for (int j = 0; j < placement.Shape[i].Values.Length; j++)
+                        {
+                            if (placement.Shape[i].Values[j] != CellType.Empty)
+                            {
+                                int nextRow = startItemRow + i;
+                                int nextCol = startItemCol + j;
+                                if (_cellWrappers[nextRow][nextCol].Values[0] != CellType.Empty)
+                                {
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                    OccupyCells(placement.Shape, startItemRow, startItemCol);
+                    return true;
+                }
+                return false;
+            }
+            return false;
+        }
 
         #endregion
 
@@ -224,7 +274,6 @@
                 OccupyCells(shape, startRow, startCol);
 
                 itemView.Rect.SetParent(ItemParent);
-                itemView.Rect.sizeDelta = new Vector2(shape[0].Values.Length * GridLayout.cellSize.x, shape.Length * GridLayout.cellSize.y);
                 itemView.transform.localPosition = ItemParent.InverseTransformPoint(_cellObjects[centerRow][centerCol].transform.position);
 
                 PlacementItem newPlacement = new PlacementItem
@@ -250,56 +299,6 @@
                 }
                 return false;
             }
-        }
-
-        private bool TryReleasePlacement(PlacementItem placement)
-        {
-            if (placement != null)
-            {
-                Vector2Int shapeCenter = GetItemCenter(placement.Shape);
-                int startItemRow = placement.ItemCenter.x - shapeCenter.x;
-                int startItemCol = placement.ItemCenter.y - shapeCenter.y;
-
-                if (AreCellsInBounds(startItemRow, startItemCol, placement.Shape))
-                {
-                    ReleaseCells(placement.Shape, startItemRow, startItemCol);
-                    return true;
-                }
-            }
-            return false;
-        }
-        
-        private bool TryRestorePlacement(PlacementItem placement)
-        {
-            if (placement != null)
-            {
-                Vector2Int shapeCenter = GetItemCenter(placement.Shape);
-                int startItemRow = placement.ItemCenter.x - shapeCenter.x;
-                int startItemCol = placement.ItemCenter.y - shapeCenter.y;
-
-                if (AreCellsInBounds(startItemRow, startItemCol, placement.Shape))
-                {
-                    for (int i = 0; i < placement.Shape.Length; i++)
-                    {
-                        for (int j = 0; j < placement.Shape[i].Values.Length; j++)
-                        {
-                            if (placement.Shape[i].Values[j] != CellType.Empty)
-                            {
-                                int nextRow = startItemRow + i;
-                                int nextCol = startItemCol + j;
-                                if (_cellWrappers[nextRow][nextCol].Values[0] != CellType.Empty)
-                                {
-                                    return false;
-                                }
-                            }
-                        }
-                    }
-                    OccupyCells(placement.Shape, startItemRow, startItemCol);
-                    return true;
-                }
-                return false;
-            }
-            return false;
         }
         
         private bool TryGetPlacementByCenter(Wrapper<CellType>[] shape, Vector3 position, out int startItemRow, out int startItemCol, out int centerRow, out int centerCol)
