@@ -24,12 +24,7 @@
         private Wrapper<CellType>[] _originalGrid;
         private float _rotationAngle;
 
-        public void Initialize(BaseItem itemData, InventoryView inventoryView)
-        {
-            ItemData = itemData;
-            _inventoryView = inventoryView;
-            ID = GetInstanceID().ToString();
-        }
+        #region UNITY_REGION
 
         public void OnBeginDrag(PointerEventData eventData)
         {
@@ -95,6 +90,21 @@
             _image.color = Color.white;
         }
 
+        #endregion
+
+        #region PUBLIC_REGION
+
+        public void Initialize(BaseItem itemData, InventoryView inventoryView)
+        {
+            ItemData = itemData;
+            _inventoryView = inventoryView;
+            ID = GetInstanceID().ToString();
+        }
+
+        #endregion
+
+        #region PRIVATE_REGION
+
         private void RotateClockwise()
         {
             BaseItem temp = ItemData;
@@ -153,5 +163,7 @@
 
         private Wrapper<CellType>[] DeepCopyShape(Wrapper<CellType>[] original) 
             => original.Select(w => new Wrapper<CellType> { Values = (CellType[])w.Values.Clone() }).ToArray();
+
+        #endregion
     }
 }
