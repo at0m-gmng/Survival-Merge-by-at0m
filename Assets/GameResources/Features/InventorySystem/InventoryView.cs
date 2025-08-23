@@ -1,6 +1,5 @@
 ﻿namespace GameResources.Features.InventorySystem
 {
-    using System.Reflection;
     using EditorGridDrawled;
     using Data;
     using UniRx;
@@ -210,14 +209,13 @@
         private bool TryPlaceItem(ItemView itemView, Vector3 position)
         {
             Wrapper<CellType>[] shape = itemView.ItemData.TryGetItemSize();
-            string id = GetItemId(itemView);
-            bool hadPosition = Inventory.TryGetPlacement(id, out PlacementItem oldPlacement);
+            bool hadPosition = Inventory.TryGetPlacement(itemView.ID, out PlacementItem oldPlacement);
 
             if (hadPosition)
             {
                 if (TryReleasePlacement(oldPlacement))
                 {
-                    Inventory.TryRemovePlacement(id);
+                    Inventory.TryRemovePlacement(itemView.ID);
                 }
             }
 
@@ -231,7 +229,7 @@
 
                 PlacementItem newPlacement = new PlacementItem
                 {
-                    ID = id,
+                    ID = itemView.ID,
                     ItemCenter = new Vector2Int(centerRow, centerCol),
                     Shape = shape
                 };
@@ -369,20 +367,6 @@
                 return true;
             }
             return false;
-        }
-        
-        private string GetItemId(ItemView itemView)
-        {
-            PropertyInfo idProp = itemView.GetType().GetProperty("ID");
-            if (idProp != null)
-            {
-                string val = idProp.GetValue(itemView) as string;
-                if (!string.IsNullOrEmpty(val))
-                {
-                    return val;
-                }
-            }
-            return itemView.gameObject.GetInstanceID().ToString();
         }
 
         private Vector2Int GetItemCenter(Wrapper<CellType>[] shape)

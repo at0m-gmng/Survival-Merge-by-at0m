@@ -8,6 +8,7 @@
     public class ItemView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
     {
         public virtual ItemData ItemData { get; private set; } = null;
+        public string ID { get; private set; } = string.Empty;
 
         [field: SerializeField] public RectTransform Rect { get; private set; } = default;
         [SerializeField] private Image _image = default;
@@ -20,6 +21,7 @@
         {
             ItemData = itemData;
             _inventoryView = inventoryView;
+            ID = GetInstanceID().ToString();
         }
 
         public void OnBeginDrag(PointerEventData eventData)
