@@ -698,6 +698,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _isLoad: 1
   _inventoryView: {fileID: 1192976942}
+  _mergeData: {fileID: 11400000, guid: 8465a4cf4b0848c4ea054cbed43be903, type: 2}
   _itemsParent: {fileID: 529191073}
 --- !u!1001 &1228832188
 PrefabInstance:

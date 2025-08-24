@@ -14,16 +14,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <Item>k__BackingField:
     <Id>k__BackingField: 9b6b225accf20c540aa69f892441837c
+    <Type>k__BackingField: 3
     <DisplayName>k__BackingField: Bullet
     <Description>k__BackingField: Bullet
     <UIPrefab>k__BackingField: {fileID: 9095486155441931183, guid: 684318664875d894f83044c55247902e, type: 3}
     <WorldPrefab>k__BackingField: {fileID: 0}
     <Grid>k__BackingField:
     - Values: 02000000
+    <IsRotatable>k__BackingField: 1
+    <IsMergable>k__BackingField: 0
     <EditorGrid>k__BackingField:
       _rows: 1
       _columns: 1
       _cellSize: 2
       _grid:
       - Values: 02000000
-    <IsRotatable>k__BackingField: 1

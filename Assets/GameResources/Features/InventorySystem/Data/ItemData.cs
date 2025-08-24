@@ -30,12 +30,14 @@ namespace GameResources.Features.InventorySystem.Data
 
             Item = new BaseItem(
                 Item.Id,
+                Item.Type,
                 Item.DisplayName,
                 Item.Description,
                 Item.UIPrefab,
                 Item.WorldPrefab,
                 Item.EditorGrid,
-                Item.IsRotatable
+                Item.IsRotatable,
+                Item.IsMergable
             )
             {
                 Grid = Item.EditorGrid.GetGrid()
@@ -50,14 +52,17 @@ namespace GameResources.Features.InventorySystem.Data
     {
         public BaseItem(
             string id,
+            ItemType type = ItemType.None,
             string displayName = default,
             string description = default,
             ItemView uiPrefab = default,
             ItemView worldPrefab = default,
             EditorGridItem editorGrid = default,
-            bool isRotatable = true)
+            bool isRotatable = true,
+            bool isMergable = true)
         {
             Id = id;
+            Type = type;
             DisplayName = displayName;
             Description = description;
             UIPrefab = uiPrefab;
@@ -65,10 +70,12 @@ namespace GameResources.Features.InventorySystem.Data
             Grid = editorGrid != null ? editorGrid.GetGrid() : default;
             EditorGrid = editorGrid != null ? editorGrid : new EditorGridItem();
             IsRotatable = isRotatable;
+            IsMergable = isMergable;
         }
         
         [Header("Identity")]
         [field: SerializeField] public string Id { get; private set; }
+        [field: SerializeField] public ItemType Type { get; private set; }
         [field: SerializeField] public string DisplayName { get; private set; }
         [field: SerializeField] public string Description { get; private set; }
 
@@ -78,11 +85,13 @@ namespace GameResources.Features.InventorySystem.Data
 
         [Header("Options")]
         [field: SerializeField] public Wrapper<CellType>[] Grid { get; set; }
+        [field: SerializeField] public bool IsRotatable { get; private set; }
+        [field: SerializeField] public bool IsMergable { get; private set; }
+        
 #if UNITY_EDITOR
         [Header("Editor Helpful Grid")]
         [field: SerializeField] public EditorGridItem EditorGrid { get; private set; }
 #endif
-        [field: SerializeField] public bool IsRotatable { get; private set; }
 
         public Wrapper<CellType>[] TryGetItemSize()
         {

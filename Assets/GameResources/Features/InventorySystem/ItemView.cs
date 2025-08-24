@@ -1,5 +1,6 @@
 ﻿namespace GameResources.Features.InventorySystem
 {
+    using System.Collections.Generic;
     using Data;
     using DG.Tweening;
     using UniRx;
@@ -8,6 +9,7 @@
     using UnityEngine.UI;
     using System.Linq;
     using EditorGridDrawled;
+    using MergeData;
 
     public class ItemView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
     {
@@ -18,6 +20,7 @@
         [SerializeField] private Image _image = default;
         
         private InventoryView _inventoryView = default;
+        private MergeData _mergeData = default;
         private Vector3 _startPosition;
         private Transform _startParent;
         private CompositeDisposable _dragDisposables = new CompositeDisposable();
@@ -94,10 +97,11 @@
 
         #region PUBLIC_REGION
 
-        public void Initialize(BaseItem itemData, InventoryView inventoryView)
+        public void Initialize(BaseItem itemData, MergeData mergeData, InventoryView inventoryView)
         {
             ItemData = itemData;
             _inventoryView = inventoryView;
+            _mergeData = mergeData;
             ID = GetInstanceID().ToString();
         }
 
