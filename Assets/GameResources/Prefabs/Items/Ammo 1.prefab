@@ -66,6 +66,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <Rect>k__BackingField: {fileID: 5355243795728677712}
   _image: {fileID: 7326604131103306693}
+  _rayImage: {fileID: 1867739185902237007}
 --- !u!222 &3119889218579946219
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -94,7 +95,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: 7c1835c831cc33045b3e15f614ed66d7, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

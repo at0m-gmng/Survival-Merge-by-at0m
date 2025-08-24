@@ -16,6 +16,7 @@
 
         [field: SerializeField] public RectTransform Rect { get; private set; } = default;
         [SerializeField] private Image _image = default;
+        [SerializeField] private Image _rayImage = default;
         
         private InventoryView _inventoryView = default;
         private MergeData _mergeData = default;
@@ -112,6 +113,7 @@
             _inventoryView = inventoryView;
             _mergeData = mergeData;
             ID = GetInstanceID().ToString();
+            _rayImage.alphaHitTestMinimumThreshold = 0.1f;
         }
 
         public void ApplyRotation(int rotationCount)
