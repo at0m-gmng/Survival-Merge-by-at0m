@@ -105,5 +105,43 @@ namespace GameResources.Features.InventorySystem.Data
 #if UNITY_EDITOR
         public CellType[,] GetGridMatrix() => EditorGrid.GetGridMatrix();
 #endif
+        
+        public BaseItem GetRotation(int rotationCount)
+        {
+            rotationCount = ((rotationCount % 4) + 4) % 4;
+            if (rotationCount != 0)
+            {
+                Wrapper<CellType>[] position = Grid;
+                for (int i = 0; i < rotationCount; i++)
+                {
+                    position = RotateOnce(position);
+                }
+
+                BaseItem rotatedItem = this;
+                rotatedItem.Grid = position;
+                return rotatedItem;
+            }
+
+            return this;
+        }
+
+        public void SaveRotation(BaseItem source) => Grid = source.Grid;
+
+        private Wrapper<CellType>[] RotateOnce(Wrapper<CellType>[] shape)
+        {
+            Wrapper<CellType>[] newShape = new Wrapper<CellType>[shape[0].Values.Length];
+            for (int i = 0; i < shape[0].Values.Length; i++)
+            {
+                newShape[i] = new Wrapper<CellType>
+                {
+                    Values = new CellType[shape.Length]
+                };
+                for (int j = 0; j < shape.Length; j++)
+                {
+                    newShape[i].Values[j] = shape[shape.Length - 1 - j].Values[i];
+                }
+            }
+            return newShape;
+        }
     }
 }

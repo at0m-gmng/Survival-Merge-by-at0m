@@ -45,10 +45,21 @@
             {
                 for (int j = 0; j < _cellObjects[i].Count; j++)
                 {
-                    if (IsAvailablePlaceByCenter(itemView.ItemData.TryGetItemSize(), _cellObjects[i][j].transform.position))
+                    Vector3 cellPos = _cellObjects[i][j].transform.position;
+
+                    for (int k = 0; k < 4; k++)
                     {
-                        TryPlaceItem(itemView, _cellObjects[i][j].transform.position);
-                        return true;
+                        BaseItem rotated = itemView.ItemData.GetRotation(k);
+
+                        if (IsAvailablePlaceByCenter(rotated.Grid, cellPos))
+                        {
+                            itemView.ItemData.SaveRotation(rotated);
+                            if (TryPlaceItem(itemView, cellPos, rotated.Grid))
+                            {
+                                itemView.ApplyRotation(k);
+                                return true;
+                            }
+                        }
                     }
                 }
             }
@@ -256,9 +267,9 @@
             }
         }
         
-        private bool TryPlaceItem(ItemView itemView, Vector3 position)
+        private bool TryPlaceItem(ItemView itemView, Vector3 position, Wrapper<CellType>[] shape = null)
         {
-            Wrapper<CellType>[] shape = itemView.ItemData.TryGetItemSize();
+            shape ??= itemView.ItemData.TryGetItemSize();
             bool hadPosition = Inventory.TryGetPlacement(itemView.ID, out PlacementItem oldPlacement);
 
             if (hadPosition)
