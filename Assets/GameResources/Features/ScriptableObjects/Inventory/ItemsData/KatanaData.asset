@@ -16,8 +16,6 @@ MonoBehaviour:
     <Id>k__BackingField: 70150094196363841ba43508d166269a
     <Type>k__BackingField: 1
     <Level>k__BackingField: 1
-    <DisplayName>k__BackingField: Katana
-    <Description>k__BackingField: Katana
     <UIPrefab>k__BackingField: {fileID: 1327997638166509237, guid: fd33a812688b0a941ae26b282e9adf6b, type: 3}
     <WorldPrefab>k__BackingField: {fileID: 0}
     <Grid>k__BackingField:
@@ -34,3 +32,12 @@ MonoBehaviour:
       - Values: 01000000
       - Values: 02000000
       - Values: 01000000
+  <ItemDataView>k__BackingField:
+    Name: 
+    Level: 0
+    Image: {fileID: 0}
+    DamageType: 0
+    TargetType: 0
+    AttackSpeed: 0
+    Damage: 0
+    Range: 0
