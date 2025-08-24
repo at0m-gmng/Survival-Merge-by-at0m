@@ -53,7 +53,7 @@
 
                         if (IsAvailablePlaceByCenter(rotated.Grid, cellPos))
                         {
-                            itemView.ItemData.SaveRotation(rotated);
+                            itemView.ItemData = rotated;
                             if (TryPlaceItem(itemView, cellPos, rotated.Grid))
                             {
                                 itemView.ApplyRotation(k);
@@ -142,6 +142,7 @@
                 if (AreCellsInBounds(startItemRow, startItemCol, placement.Shape))
                 {
                     ReleaseCells(placement.Shape, startItemRow, startItemCol);
+                    Inventory.TryRemovePlacement(placement.ID);
                     return true;
                 }
             }

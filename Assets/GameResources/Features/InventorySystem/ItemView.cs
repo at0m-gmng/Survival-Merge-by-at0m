@@ -1,5 +1,6 @@
 ﻿namespace GameResources.Features.InventorySystem
 {
+    using System.Collections.Generic;
     using Data;
     using DG.Tweening;
     using UniRx;
@@ -10,7 +11,7 @@
 
     public class ItemView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
     {
-        public virtual BaseItem ItemData { get; private set; }
+        public virtual BaseItem ItemData { get; set; }
         public string ID { get; private set; } = string.Empty;
 
         [field: SerializeField] public RectTransform Rect { get; private set; } = default;
@@ -25,6 +26,7 @@
         private BaseItem _tempData = default;
         private Vector3 _defaultRotation = default;
         private int _rotationCount = 0;
+        private List<RaycastResult> _rayResult = new List<RaycastResult>();
 
         #region UNITY_REGION
 
@@ -34,13 +36,11 @@
             _startParent = transform.parent;
             _defaultRotation = Rect.localEulerAngles;
             _tempData = ItemData;
+            transform.SetAsLastSibling();
 
             if (_inventoryView.Inventory.TryGetPlacement(ID, out PlacementItem placement))
             {
-                if (_inventoryView.TryReleasePlacement(placement))
-                {
-                    _inventoryView.Inventory.TryRemovePlacement(ID);
-                }
+                _inventoryView.TryReleasePlacement(placement);
             }
 
             if (ItemData.IsRotatable)
@@ -62,6 +62,24 @@
         {
             _dragDisposables.Clear();
 
+            if (ItemData.IsMergable)
+            {
+                ItemView overlappedItem = GetOverlappedItem();
+                if (overlappedItem != null && CanMerge(overlappedItem, out ItemData resultItem))
+                {
+                    if (_inventoryView.Inventory.TryGetPlacement(ID, out PlacementItem placement))
+                    {
+                        _inventoryView.TryReleasePlacement(placement);
+                    }
+                    if (_inventoryView.Inventory.TryGetPlacement(overlappedItem.ID, out PlacementItem inventoryPlacement))
+                    {
+                        _inventoryView.TryReleasePlacement(inventoryPlacement);
+                    }
+                    
+                    Merge(overlappedItem, resultItem);
+                }
+            }
+            
             if (!_inventoryView.IsAvailablePlaceByCenter(_tempData.TryGetItemSize(), transform.position))
             {
                 transform.SetParent(_startParent);
@@ -78,12 +96,12 @@
             {
                 if (!string.IsNullOrEmpty(_tempData.Id))
                 {
-                    ItemData.SaveRotation(_tempData);
-                    _tempData = default;
+                    ItemData = _tempData;
                 }
                 _inventoryView.TryPlaceItem(this);
             }
             _image.color = Color.white;
+            _tempData = default;
         }
 
         #endregion
@@ -132,7 +150,55 @@
 
             CheckAvaillablePlaced();
         }
+        
+        private ItemView GetOverlappedItem()
+        {
+            PointerEventData pointerData = new PointerEventData(EventSystem.current)
+            {
+                position = transform.position
+            };
+            _rayResult.Clear();
+            EventSystem.current.RaycastAll(pointerData, _rayResult);
 
+            foreach (RaycastResult result in _rayResult)
+            {
+                ItemView itemView = result.gameObject.GetComponent<ItemView>();
+                if (itemView != null && itemView != this && itemView.ItemData.IsMergable)
+                {
+                    return itemView;
+                }
+            }
+            return null;
+        }
+
+        private bool CanMerge(ItemView otherItem, out ItemData resultItem)
+        {
+            resultItem = null;
+            if (ItemData.Type == otherItem.ItemData.Type && ItemData.Level == otherItem.ItemData.Level)
+            {
+                foreach (MergeRule rule in _mergeData.Rules)
+                {
+                    if (rule.Type == ItemData.Type && rule.Level == ItemData.Level)
+                    {
+                        resultItem = rule.ResultItem;
+                        return true;
+                    }
+                }
+                return false;
+            }
+            return false;
+        }
+        
+        private void Merge(ItemView otherItem, ItemData resultItem)
+        {
+            Destroy(otherItem.gameObject);
+            Destroy(gameObject);
+
+            ItemView newItemView = Instantiate(resultItem.Item.UIPrefab, transform.parent);
+            newItemView.Initialize(resultItem.Item, _mergeData, _inventoryView);
+            _inventoryView.TryAutoPlaceItem(newItemView);
+        }
+        
         #endregion
     }
 }

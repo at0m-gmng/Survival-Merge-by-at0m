@@ -31,6 +31,7 @@ namespace GameResources.Features.InventorySystem.Data
             Item = new BaseItem(
                 Item.Id,
                 Item.Type,
+                Item.Level,
                 Item.DisplayName,
                 Item.Description,
                 Item.UIPrefab,
@@ -53,6 +54,7 @@ namespace GameResources.Features.InventorySystem.Data
         public BaseItem(
             string id,
             ItemType type = ItemType.None,
+            int level = default,
             string displayName = default,
             string description = default,
             ItemView uiPrefab = default,
@@ -63,6 +65,7 @@ namespace GameResources.Features.InventorySystem.Data
         {
             Id = id;
             Type = type;
+            Level = level;
             DisplayName = displayName;
             Description = description;
             UIPrefab = uiPrefab;
@@ -76,6 +79,7 @@ namespace GameResources.Features.InventorySystem.Data
         [Header("Identity")]
         [field: SerializeField] public string Id { get; private set; }
         [field: SerializeField] public ItemType Type { get; private set; }
+        [field: SerializeField] public int Level { get; private set; }
         [field: SerializeField] public string DisplayName { get; private set; }
         [field: SerializeField] public string Description { get; private set; }
 
@@ -124,8 +128,6 @@ namespace GameResources.Features.InventorySystem.Data
 
             return this;
         }
-
-        public void SaveRotation(BaseItem source) => Grid = source.Grid;
 
         private Wrapper<CellType>[] RotateOnce(Wrapper<CellType>[] shape)
         {
