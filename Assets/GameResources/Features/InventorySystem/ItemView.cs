@@ -26,7 +26,9 @@
         private BaseItem _tempData = default;
         private Vector3 _defaultRotation = default;
         private int _rotationCount = 0;
+        private int _startRotationCount = 0;
         private List<RaycastResult> _rayResult = new List<RaycastResult>();
+        private PlacementItem _placementItem = default;
 
         #region UNITY_REGION
 
@@ -36,11 +38,12 @@
             _startParent = transform.parent;
             _defaultRotation = Rect.localEulerAngles;
             _tempData = ItemData;
+            _startRotationCount = _rotationCount;
             transform.SetAsLastSibling();
 
-            if (_inventoryView.Inventory.TryGetPlacement(ID, out PlacementItem placement))
+            if (_inventoryView.Inventory.TryGetPlacement(ID, out _placementItem))
             {
-                _inventoryView.TryReleasePlacement(placement);
+                _inventoryView.TryReleasePlacement(_placementItem);
             }
 
             if (ItemData.IsRotatable)
@@ -84,13 +87,8 @@
             {
                 transform.SetParent(_startParent);
                 transform.position = _startPosition;
-
-                Rect.eulerAngles = _defaultRotation;
-
-                if (_inventoryView.Inventory.TryGetPlacement(ID, out PlacementItem placement))
-                {
-                    _inventoryView.TryRestorePlacement(placement);
-                }
+                ApplyRotation(_startRotationCount);
+                _inventoryView.TryRestorePlacement(_placementItem);
             }
             else
             {
@@ -141,9 +139,9 @@
         
         private void RotateClockwise()
         {
-            _rotationCount = (((_rotationCount + 1) % 4) + 4) % 4;
+            _rotationCount = (_rotationCount + 1) & 3;
             _rotationAngle -= 90f;
-            _tempData =  ItemData.GetRotation(_rotationCount);
+            _tempData = _tempData.GetRotation(1);
 
             Rect.DORotate(new Vector3(0, 0, _rotationAngle), 0.1f);
             Rect.DOMove(Input.mousePosition, 0.1f);

@@ -111,7 +111,6 @@
                         int checkRow = startRow + i;
                         if (checkRow < 0 || checkRow >= _cellWrappers.Count)
                         {
-                            Debug.Log($"[IsAvailablePlaceByCenter] Выход за границы по строке: {checkRow}. target={targetRow},{targetCol} start={startRow},{startCol} shapeIndex={i},{j}");
                             return false;
                         }
 
@@ -175,6 +174,7 @@
                         }
                     }
                     OccupyCells(placement.Shape, startItemRow, startItemCol);
+                    Inventory.AddOrUpdatePlacement(placement);
                     return true;
                 }
                 return false;
@@ -303,10 +303,7 @@
                 {
                     if (oldPlacement != null)
                     {
-                        if (TryRestorePlacement(oldPlacement))
-                        {
-                            Inventory.AddOrUpdatePlacement(oldPlacement);
-                        }
+                        TryRestorePlacement(oldPlacement);
                     }
                 }
                 return false;
