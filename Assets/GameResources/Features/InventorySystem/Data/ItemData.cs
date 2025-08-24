@@ -8,6 +8,7 @@ namespace GameResources.Features.InventorySystem.Data
     public class ItemData : ScriptableObject
     {
         [field: SerializeField] public BaseItem Item { get; private set; }
+        [field: SerializeField] public ItemDataView ItemDataView { get; private set; } = new ItemDataView();
 
         private string _id = default;
         
@@ -32,8 +33,6 @@ namespace GameResources.Features.InventorySystem.Data
                 Item.Id,
                 Item.Type,
                 Item.Level,
-                Item.DisplayName,
-                Item.Description,
                 Item.UIPrefab,
                 Item.WorldPrefab,
                 Item.EditorGrid,
@@ -55,8 +54,6 @@ namespace GameResources.Features.InventorySystem.Data
             string id,
             ItemType type = ItemType.None,
             int level = default,
-            string displayName = default,
-            string description = default,
             ItemView uiPrefab = default,
             ItemView worldPrefab = default,
             EditorGridItem editorGrid = default,
@@ -66,8 +63,6 @@ namespace GameResources.Features.InventorySystem.Data
             Id = id;
             Type = type;
             Level = level;
-            DisplayName = displayName;
-            Description = description;
             UIPrefab = uiPrefab;
             WorldPrefab = worldPrefab;
             Grid = editorGrid != null ? editorGrid.GetGrid() : default;
@@ -80,8 +75,6 @@ namespace GameResources.Features.InventorySystem.Data
         [field: SerializeField] public string Id { get; private set; }
         [field: SerializeField] public ItemType Type { get; private set; }
         [field: SerializeField] public int Level { get; private set; }
-        [field: SerializeField] public string DisplayName { get; private set; }
-        [field: SerializeField] public string Description { get; private set; }
 
         [Header("Visual")]
         [field: SerializeField] public ItemView UIPrefab { get; private set; }
@@ -145,5 +138,29 @@ namespace GameResources.Features.InventorySystem.Data
             }
             return newShape;
         }
+    }
+    
+    [Serializable]
+    public class ItemDataView
+    {
+        public string Name;
+        public int Level;
+        public Sprite Image;
+        public DamageType DamageType;
+        public TargetType TargetType;
+        public float AttackSpeed;
+        public float Damage;
+        public float Range;
+    }
+
+    public enum DamageType
+    {
+        Physical = 0,
+        Magical = 1
+    }
+    public enum TargetType
+    {
+        Random = 0,
+        Nearest = 1
     }
 }
