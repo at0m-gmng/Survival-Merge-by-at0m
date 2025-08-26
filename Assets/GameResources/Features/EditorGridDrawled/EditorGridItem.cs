@@ -1,57 +1,44 @@
 namespace GameResources.Features.EditorGridDrawled
 {
     using System;
+    using System.Collections.Generic;
+    using Matrix;
     using UnityEngine;
 
     [Serializable]
     public sealed class EditorGridItem
     {
+        public Matrix MatrixGrid => _matrixGrid;
+
         [SerializeField] private int _rows = 4;
         [SerializeField] private int _columns = 4;
-        [Range(1, 10)] 
+        [Range(1, 10)]
         [SerializeField] private int _cellSize = 1;
-        [SerializeField] private Wrapper<CellType>[] _grid;
-    
+        [SerializeField] private Matrix _matrixGrid;
+
         public void ResetGrid()
         {
-            _grid = new Wrapper<CellType>[_rows];
-            for (int i = 0; i < _rows; i++)
+            var mg = new Matrix { Rows = new List<ColumnList>() };
+            int targetRows = Mathf.Max(1, _rows);
+            int targetColumns = Mathf.Max(1, _columns);
+
+            for (int i = 0; i < targetRows; i++)
             {
-                _grid[i] = new Wrapper<CellType>();
-                _grid[i].Values = new CellType[_columns];
-            
-                for (int j = 0; j < _columns; j++)
-                {
-                    _grid[i].Values[j] = CellType.Empty;
-                }
+                var row = new ColumnList { Columns = new List<int>() };
+                for (int j = 0; j < targetColumns; j++)
+                    row.Columns.Add(0);
+                mg.Rows.Add(row);
             }
+
+            _matrixGrid = mg;
         }
 
-        public CellType[,] GetGridMatrix()
-        {
-            CellType[,] matrix = new CellType[_rows, _columns];
-            for (int i = 0; i < _rows; i++)
-            {
-                for (int j = 0; j < _columns; j++)
-                {
-                    matrix[i, j] = _grid[i].Values[j];
-                }
-            }
-            return matrix;
-        }
-
-        public Wrapper<CellType>[] GetGrid() => _grid;
-    }
-
-    [Serializable]
-    public class Wrapper<T>
-    {
-        public T[] Values;
+        public Matrix GetGrid() => _matrixGrid;
     }
 
     public enum CellType
     {
-        Empty = 0, 
+        Empty = 0,
         Busy = 1,
         Center = 2
     }

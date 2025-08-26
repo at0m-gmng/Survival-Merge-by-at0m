@@ -14,10 +14,11 @@ namespace GameResources.Features.EditorGridDrawled
         private const string ROWS = "_rows";
         private const string COLUMNS = "_columns";
         private const string CELL_SIZE = "_cellSize";
-        private const string GRID_FIELD = "_grid";
-        private const string WRAPPER_VALUES = "Values";
+        private const string GRID_FIELD = "_matrixGrid";
+        private const string MATRIX_ROWS = "Rows";
+        private const string MATRIX_COLUMNS = "Columns";
 
-        private SerializedProperty _gridProperty;
+        private SerializedProperty _matrixProperty;
         private SerializedProperty _rowsProperty;
         private SerializedProperty _columnsProperty;
         private SerializedProperty _cellSizeProperty;
@@ -29,20 +30,20 @@ namespace GameResources.Features.EditorGridDrawled
             _rowsProperty = property.FindPropertyRelative(ROWS);
             _columnsProperty = property.FindPropertyRelative(COLUMNS);
             _cellSizeProperty = property.FindPropertyRelative(CELL_SIZE);
-            _gridProperty = property.FindPropertyRelative(GRID_FIELD);
+            _matrixProperty = property.FindPropertyRelative(GRID_FIELD);
 
             Rect rowsRect = new Rect(position.x, position.y, position.width, EditorGUIUtility.singleLineHeight);
             Rect columnsRect = new Rect(position.x, rowsRect.y + EditorGUIUtility.singleLineHeight + 2, position.width, EditorGUIUtility.singleLineHeight);
             Rect cellSizeRect = new Rect(position.x, columnsRect.y + EditorGUIUtility.singleLineHeight + 2, position.width, EditorGUIUtility.singleLineHeight);
-        
+
             EditorGUI.PropertyField(rowsRect, _rowsProperty);
             EditorGUI.PropertyField(columnsRect, _columnsProperty);
             EditorGUI.PropertyField(cellSizeRect, _cellSizeProperty);
 
             Rect gridRect = new Rect(
-                position.x, 
-                cellSizeRect.y + EditorGUIUtility.singleLineHeight + 10, 
-                position.width, 
+                position.x,
+                cellSizeRect.y + EditorGUIUtility.singleLineHeight + 10,
+                position.width,
                 position.height - (EditorGUIUtility.singleLineHeight * 3 + 14)
             );
 
@@ -55,39 +56,47 @@ namespace GameResources.Features.EditorGridDrawled
         {
             SerializedProperty rowsProperty = property.FindPropertyRelative(ROWS);
             SerializedProperty cellSizeProperty = property.FindPropertyRelative(CELL_SIZE);
-        
+
             int rows = rowsProperty != null ? Mathf.Max(1, rowsProperty.intValue) : 4;
             int cellSizeMultiplier = cellSizeProperty != null ? Mathf.Max(1, cellSizeProperty.intValue) : 1;
-        
+
             float gridHeight = rows * 30 * cellSizeMultiplier;
-        
+
             return EditorGUIUtility.singleLineHeight * 3 + 14 + gridHeight;
         }
 
         private void DrawGrid(Rect position, SerializedProperty property)
         {
-            int rows = _rowsProperty.intValue;
-            int columns = _columnsProperty.intValue;
-            int cellSizeMultiplier = Mathf.Max(1, _cellSizeProperty.intValue);
+            int rows = _rowsProperty != null ? _rowsProperty.intValue : 0;
+            int columns = _columnsProperty != null ? _columnsProperty.intValue : 0;
+            int cellSizeMultiplier = _cellSizeProperty != null ? Mathf.Max(1, _cellSizeProperty.intValue) : 1;
 
             if (rows <= 0 || columns <= 0)
             {
                 return;
             }
 
-            if (_gridProperty == null || !_gridProperty.isArray || _gridProperty.arraySize != rows)
+            if (_matrixProperty == null)
             {
                 EditorGridItem editorGridItem = fieldInfo.GetValue(GetParentValue(property)) as EditorGridItem;
                 editorGridItem?.ResetGrid();
                 return;
             }
 
-            float baseCellSize = Mathf.Min(position.width / columns, position.height / rows);
+            SerializedProperty rowsArray = _matrixProperty.FindPropertyRelative(MATRIX_ROWS);
+            if (rowsArray == null || !rowsArray.isArray || rowsArray.arraySize != rows)
+            {
+                EditorGridItem editorGridItem = fieldInfo.GetValue(GetParentValue(property)) as EditorGridItem;
+                editorGridItem?.ResetGrid();
+                return;
+            }
+
+            float baseCellSize = Mathf.Min(position.width / (float)columns, position.height / (float)rows);
             float cellSize = baseCellSize * cellSizeMultiplier;
             cellSize = Mathf.Min(cellSize, baseCellSize);
-        
+
             float gridWidth = cellSize * columns;
-        
+
             Vector2 gridStart = new Vector2(
                 position.x + (position.width - gridWidth) / 2,
                 position.y
@@ -97,11 +106,11 @@ namespace GameResources.Features.EditorGridDrawled
             {
                 for (int i = 0; i < rows; i++)
                 {
-                    SerializedProperty row = _gridProperty.GetArrayElementAtIndex(i).FindPropertyRelative(WRAPPER_VALUES);
-                
-                    if (row.arraySize != columns)
+                    SerializedProperty rowProp = rowsArray.GetArrayElementAtIndex(i).FindPropertyRelative(MATRIX_COLUMNS);
+
+                    if (rowProp == null || !rowProp.isArray || rowProp.arraySize != columns)
                     {
-                        EditorGridItem editorGridItem = fieldInfo.GetValue(property.serializedObject.targetObject) as EditorGridItem;
+                        EditorGridItem editorGridItem = fieldInfo.GetValue(GetParentValue(property)) as EditorGridItem;
                         editorGridItem?.ResetGrid();
                         return;
                     }
@@ -120,7 +129,7 @@ namespace GameResources.Features.EditorGridDrawled
                             continue;
                         }
 
-                        SerializedProperty element = row.GetArrayElementAtIndex(j);
+                        SerializedProperty element = rowProp.GetArrayElementAtIndex(j);
                         CellType currentCell = (CellType)element.intValue;
 
                         Color originalColor = GUI.color;
@@ -136,12 +145,12 @@ namespace GameResources.Features.EditorGridDrawled
                                 GUI.color = Color.yellow;
                                 break;
                         }
-                    
+
                         if (GUI.Button(cellRect, currentCell.ToString()))
                         {
                             element.intValue = GetNextElement(element.intValue, 1, 0, 2);
                         }
-                    
+
                         GUI.color = originalColor;
                     }
                 }
@@ -156,7 +165,7 @@ namespace GameResources.Features.EditorGridDrawled
             int range = max - min + 1;
             return min + ((current - min + add) % range + range) % range;
         }
-        
+
         public static object GetParentValue(SerializedProperty property)
         {
             object obj = property.serializedObject.targetObject;

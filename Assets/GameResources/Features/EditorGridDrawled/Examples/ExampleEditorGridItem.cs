@@ -1,11 +1,12 @@
 ﻿namespace GameResources.Features.EditorGridDrawled.Examples
 {
+    using Matrix;
     using UnityEngine;
 
     [CreateAssetMenu(fileName = "ExampleEditorGridItem", menuName = "Example/Configs/ExampleEditorGridItem")]
     public sealed class ExampleEditorGridItem : ScriptableObject
     {
-        [SerializeField] private Wrapper<CellType>[] _grid;
+        [SerializeField] private Matrix _grid;
 
         [SerializeField] private EditorGridItem _editorGrid = new EditorGridItem();
         

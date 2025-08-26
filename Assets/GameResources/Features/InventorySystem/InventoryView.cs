@@ -3,12 +3,15 @@
     using EditorGridDrawled;
     using Data;
     using UniRx;
+    using Matrix;
     using UnityEngine;
     using UnityEngine.UI;
     using System.Collections.Generic;
 
     public class InventoryView : MonoBehaviour
     {
+        private const int MAX_ROTATION_COUNT = 4;
+        
         public IReadOnlyReactiveProperty<bool> Initialized => _initialized;
         private readonly ReactiveProperty<bool> _initialized = new ReactiveProperty<bool>(false);
 
@@ -19,9 +22,8 @@
         [field: SerializeField] public RectTransform OutsideParent { get; private set; }
 
         private readonly List<List<RectTransform>> _cellObjects = new();
-        private readonly List<List<Wrapper<CellType>>> _cellWrappers = new();
-        private List<RectTransform> _rowObjects = new List<RectTransform>();
-        private List<Wrapper<CellType>> _rowWrappers = new List<Wrapper<CellType>>();
+        private Dictionary<string, List<Vector2Int>> _busyCells = new Dictionary<string, List<Vector2Int>>();
+        private Matrix _cellMatrix;
 
         #region UNITY_REGION
 
@@ -47,7 +49,7 @@
                 {
                     Vector3 cellPos = _cellObjects[i][j].transform.position;
 
-                    for (int k = 0; k < 4; k++)
+                    for (int k = 0; k < MAX_ROTATION_COUNT; k++)
                     {
                         BaseItem rotated = itemView.ItemData.GetRotation(k);
 
@@ -68,7 +70,7 @@
 
         public bool TryPlaceItem(ItemView itemView) => TryPlaceItem(itemView, itemView.transform.position);
 
-        public bool IsAvailablePlaceByCenter(Wrapper<CellType>[] shape, Vector3 worldPosition)
+        public bool IsAvailablePlaceByCenter(Matrix shape, Vector3 worldPosition)
         {
             Vector2 localItemPos = GridLayout.transform.InverseTransformPoint(worldPosition);
 
@@ -92,31 +94,31 @@
                 }
             }
 
-            if ((targetRow == -1 || targetCol == -1) || (_cellWrappers[targetRow][targetCol].Values[0] != CellType.Empty))
+            if ((targetRow == -1 || targetCol == -1) || (_cellMatrix.Rows[targetRow].Columns[targetCol] != Matrix.EMPTY))
             {
                 return false;
             }
 
-            Vector2Int shapeCenter = GetItemCenter(shape);
+            Vector2Int shapeCenter = shape.GetItemCenter();
 
             int startRow = targetRow - shapeCenter.x;
             int startCol = targetCol - shapeCenter.y;
 
-            for (int i = 0; i < shape.Length; i++)
+            for (int i = 0; i < shape.Rows.Count; i++)
             {
-                for (int j = 0; j < shape[i].Values.Length; j++)
+                for (int j = 0; j < shape.Rows[i].Columns.Count; j++)
                 {
-                    if (shape[i].Values[j] != CellType.Empty)
+                    if (shape.Rows[i].Columns[j] != Matrix.EMPTY)
                     {
                         int checkRow = startRow + i;
-                        if (checkRow < 0 || checkRow >= _cellWrappers.Count)
+                        if (checkRow < 0 || checkRow >= _cellMatrix.Rows.Count)
                         {
                             return false;
                         }
 
-                        int colsInRow = _cellWrappers[checkRow].Count;
+                        int colsInRow = _cellMatrix.Rows[checkRow].Columns.Count;
                         int checkCol = startCol + j;
-                        if ((checkCol < 0 || checkCol >= colsInRow) || (_cellWrappers[checkRow][checkCol].Values[0] != CellType.Empty))
+                        if ((checkCol < 0 || checkCol >= colsInRow) || (_cellMatrix.Rows[checkRow].Columns[checkCol] != Matrix.EMPTY))
                         {
                             return false;
                         }
@@ -134,13 +136,13 @@
         {
             if (placement != null)
             {
-                Vector2Int shapeCenter = GetItemCenter(placement.Shape);
+                Vector2Int shapeCenter = placement.Shape.GetItemCenter();
                 int startItemRow = placement.ItemCenter.x - shapeCenter.x;
                 int startItemCol = placement.ItemCenter.y - shapeCenter.y;
 
                 if (AreCellsInBounds(startItemRow, startItemCol, placement.Shape))
                 {
-                    ReleaseCells(placement.Shape, startItemRow, startItemCol);
+                    ReleaseCells(placement.PlacementCells, startItemRow, startItemCol);
                     Inventory.TryRemovePlacement(placement.ID);
                     return true;
                 }
@@ -152,28 +154,28 @@
         {
             if (placement != null)
             {
-                Vector2Int shapeCenter = GetItemCenter(placement.Shape);
+                Vector2Int shapeCenter = placement.Shape.GetItemCenter();
                 int startItemRow = placement.ItemCenter.x - shapeCenter.x;
                 int startItemCol = placement.ItemCenter.y - shapeCenter.y;
 
                 if (AreCellsInBounds(startItemRow, startItemCol, placement.Shape))
                 {
-                    for (int i = 0; i < placement.Shape.Length; i++)
+                    for (int i = 0; i < placement.Shape.Rows.Count; i++)
                     {
-                        for (int j = 0; j < placement.Shape[i].Values.Length; j++)
+                        for (int j = 0; j < placement.Shape.Rows[i].Columns.Count; j++)
                         {
-                            if (placement.Shape[i].Values[j] != CellType.Empty)
+                            if (placement.Shape.Rows[i].Columns[j] != Matrix.EMPTY)
                             {
                                 int nextRow = startItemRow + i;
                                 int nextCol = startItemCol + j;
-                                if (_cellWrappers[nextRow][nextCol].Values[0] != CellType.Empty)
+                                if (_cellMatrix.Rows[nextRow].Columns[nextCol] != Matrix.EMPTY)
                                 {
                                     return false;
                                 }
                             }
                         }
                     }
-                    OccupyCells(placement.Shape, startItemRow, startItemCol);
+                    OccupyCells(placement.Shape, placement.PlacementCells, startItemRow, startItemCol);
                     Inventory.AddOrUpdatePlacement(placement);
                     return true;
                 }
@@ -189,28 +191,23 @@
         private void CreateField()
         {
             _cellObjects.Clear();
-            _cellWrappers.Clear();
-            _rowObjects.Clear();
-            _rowWrappers.Clear();
-
+            _cellMatrix = new Matrix { Rows = new List<ColumnList>(Inventory.Rows) };
+            
             for (int i = 0; i < Inventory.Rows; i++)
             {
-                _rowObjects = new List<RectTransform>(Inventory.Columns);
-                _rowWrappers = new List<Wrapper<CellType>>(Inventory.Columns);
+                List<RectTransform> rowObjects = new List<RectTransform>(Inventory.Columns);
+                ColumnList matrixRow = new ColumnList {Columns = new List<int>(Inventory.Columns) };
 
                 for (int j = 0; j < Inventory.Columns; j++)
                 {
                     RectTransform gridCell = Instantiate(Inventory.CellPrefab, GridLayout.transform);
                     gridCell.gameObject.name = $"{Inventory.CellPrefab.name}_{i}_{j}";
-                    Wrapper<CellType> cellType = new Wrapper<CellType>
-                    {
-                        Values = new[] { CellType.Empty }
-                    };
-                    _rowObjects.Add(gridCell);
-                    _rowWrappers.Add(cellType);
+
+                    rowObjects.Add(gridCell);
+                    matrixRow.Columns.Add((int)CellType.Empty);
                 }
-                _cellObjects.Add(_rowObjects);
-                _cellWrappers.Add(_rowWrappers);
+                _cellObjects.Add(rowObjects);
+                _cellMatrix.Rows.Add(matrixRow);
             }
         }
 
@@ -223,94 +220,86 @@
         
         private void RestoreOccupancyFromData()
         {
-            for (var i = 0; i < Inventory.PlacedItems.Count; i++)
+            for (int i = 0; i < Inventory.PlacedItems.Count; i++)
             {
-                var placement = Inventory.PlacedItems[i];
-                if (placement != null && placement.Shape != null)
+                PlacementItem placement = Inventory.PlacedItems[i];
+                if (placement != null)
                 {
-                    Vector2Int shapeCenter = GetItemCenter(placement.Shape);
+                    Vector2Int shapeCenter = placement.Shape.GetItemCenter();
                     int startRow = placement.ItemCenter.x - shapeCenter.x;
                     int startCol = placement.ItemCenter.y - shapeCenter.y;
 
                     if (AreCellsInBounds(startRow, startCol, placement.Shape))
                     {
-                        OccupyCells(placement.Shape, startRow, startCol);
+                        OccupyCells(placement.Shape, placement.PlacementCells, startRow, startCol);
                     }
                 }
             }
         }
         
-        private void OccupyCells(Wrapper<CellType>[] shape, int posRow, int posCol)
+        private void OccupyCells(Matrix shape, List<Vector2Int> vector2Ints, int posRow, int posCol)
         {
-            for (int i = 0; i < shape.Length; i++)
+            vector2Ints.Clear();
+            for (int i = 0; i < shape.Rows.Count; i++)
             {
-                for (int j = 0; j < shape[i].Values.Length; j++)
+                for (int j = 0; j < shape.Rows[i].Columns.Count; j++)
                 {
-                    if (shape[i].Values[j] != CellType.Empty)
+                    if (shape.Rows[i].Columns[j] != Matrix.EMPTY)
                     {
-                        _cellWrappers[posRow + i][posCol + j].Values[0] = CellType.Busy;
+                        _cellMatrix.Rows[posRow + i].Columns[posCol + j] = Matrix.BUSY;
+                        vector2Ints.Add(new Vector2Int(posRow + i, posCol + j));
                     }
                 }
             }
         }
         
-        private void ReleaseCells(Wrapper<CellType>[] shape, int posRow, int posCol)
+        private void ReleaseCells(List<Vector2Int> placement, int posRow, int posCol)
         {
-            for (int i = 0; i < shape.Length; i++)
+            for (int k = 0; k < placement.Count; k++)
             {
-                for (int j = 0; j < shape[i].Values.Length; j++)
+                for (int i = 0; i < _cellMatrix.Rows.Count; i++)
                 {
-                    if (shape[i].Values[j] != CellType.Empty)
+                    for (int j = 0; j < _cellMatrix.Rows[i].Columns.Count; j++)
                     {
-                        _cellWrappers[posRow + i][posCol + j].Values[0] = CellType.Empty;
+                        if (placement[k].x == i && placement[k].y == j)
+                        {
+                            _cellMatrix.Rows[i].Columns[j] = Matrix.EMPTY;
+                            break;
+                        }
                     }
                 }
             }
         }
         
-        private bool TryPlaceItem(ItemView itemView, Vector3 position, Wrapper<CellType>[] shape = null)
+        private bool TryPlaceItem(ItemView itemView, Vector3 position, Matrix shape = default)
         {
-            shape ??= itemView.ItemData.TryGetItemSize();
-            bool hadPosition = Inventory.TryGetPlacement(itemView.ID, out PlacementItem oldPlacement);
-
-            if (hadPosition)
+            if (shape.Rows == null || shape.Rows.Count == 0)
             {
-                if (TryReleasePlacement(oldPlacement))
-                {
-                    Inventory.TryRemovePlacement(itemView.ID);
-                }
+                shape = Matrix.Clone(itemView.ItemData.Grid);
             }
 
             if (TryGetPlacementByCenter(shape, position, out int startRow, out int startCol, out int centerRow, out int centerCol))
             {
-                OccupyCells(shape, startRow, startCol);
+                List<Vector2Int> busyCells = new List<Vector2Int>();
+                OccupyCells(shape, busyCells, startRow, startCol);
 
                 itemView.Rect.SetParent(ItemParent);
                 itemView.transform.localPosition = ItemParent.InverseTransformPoint(_cellObjects[centerRow][centerCol].transform.position);
-
+                
                 PlacementItem newPlacement = new PlacementItem
                 {
                     ID = itemView.ID,
                     ItemCenter = new Vector2Int(centerRow, centerCol),
-                    Shape = shape
+                    PlacementCells = busyCells,
+                    Shape = Matrix.Clone(shape)
                 };
                 Inventory.AddOrUpdatePlacement(newPlacement);
                 return true;
             }
-            else
-            {
-                if (hadPosition)
-                {
-                    if (oldPlacement != null)
-                    {
-                        TryRestorePlacement(oldPlacement);
-                    }
-                }
-                return false;
-            }
+            return false;
         }
         
-        private bool TryGetPlacementByCenter(Wrapper<CellType>[] shape, Vector3 position, out int startItemRow, out int startItemCol, out int centerRow, out int centerCol)
+        private bool TryGetPlacementByCenter(Matrix shape, Vector3 position, out int startItemRow, out int startItemCol, out int centerRow, out int centerCol)
         {
             startItemRow = startItemCol = centerRow = centerCol = -1;
             Vector2 localItemPos = GridLayout.transform.InverseTransformPoint(position);
@@ -335,20 +324,22 @@
 
             if (centerRow >= 0)
             {
-                Vector2Int shapeCenter = GetItemCenter(shape);
+                Vector2Int shapeCenter = shape.GetItemCenter();
                 startItemRow = centerRow - shapeCenter.x;
                 startItemCol = centerCol - shapeCenter.y;
 
-                for (int i = 0; i < shape.Length; i++)
+                for (int i = 0; i < shape.Rows.Count; i++)
                 {
-                    for (int j = 0; j < shape[i].Values.Length; j++)
+                    for (int j = 0; j < shape.Rows[i].Columns.Count; j++)
                     {
-                        if (shape[i].Values[j] != CellType.Empty)
+                        if (shape.Rows[i].Columns[j] != Matrix.EMPTY)
                         {
                             int nextRow = startItemRow + i;
                             int nextCol = startItemCol + j;
 
-                            if ((nextRow < 0 || nextRow >= _cellWrappers.Count) || (nextCol < 0 || nextCol >= _cellWrappers[nextRow].Count) || (_cellWrappers[nextRow][nextCol].Values[0] != CellType.Empty))
+                            if ((nextRow < 0 || nextRow >= _cellMatrix.Rows.Count) || 
+                                (nextCol < 0 || nextCol >= _cellMatrix.Rows[nextRow].Columns.Count) || 
+                                (_cellMatrix.Rows[nextRow].Columns[nextCol] != Matrix.EMPTY))
                             {
                                 return false;
                             }
@@ -360,14 +351,15 @@
             return false;
         }
         
-        private bool AreCellsInBounds(int startRow, int startCol, Wrapper<CellType>[] shape)
+        private bool AreCellsInBounds(int startRow, int startCol, Matrix shape)
         {
-            if (startRow >= 0 && startRow + shape.Length <= _cellWrappers.Count)
+            if (startRow >= 0 && startRow + shape.Rows.Count <= _cellMatrix.Rows.Count)
             {
-                for (int i = 0; i < shape.Length; i++)
+                for (int i = 0; i < shape.Rows.Count; i++)
                 {
                     int nextRow = startRow + i;
-                    if ((nextRow < 0 || nextRow >= _cellWrappers.Count) || (startCol < 0 || startCol + shape[i].Values.Length > _cellWrappers[nextRow].Count))
+                    if ((nextRow < 0 || nextRow >= _cellMatrix.Rows.Count) || 
+                        (startCol < 0 || startCol + shape.Rows[i].Columns.Count > _cellMatrix.Rows[nextRow].Columns.Count))
                     {
                         return false;
                     }
@@ -377,21 +369,6 @@
             return false;
         }
 
-        private Vector2Int GetItemCenter(Wrapper<CellType>[] shape)
-        {
-            for (int i = 0; i < shape.Length; i++)
-            {
-                for (int j = 0; j < shape[i].Values.Length; j++)
-                {
-                    if (shape[i].Values[j] == CellType.Center)
-                    {
-                        return new Vector2Int(i, j);
-                    }
-                }
-            }
-            return Vector2Int.zero;
-        }
-        
         #endregion
     }
 }

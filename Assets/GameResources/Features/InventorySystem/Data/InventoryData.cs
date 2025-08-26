@@ -46,10 +46,10 @@
         {
             if (!string.IsNullOrEmpty(id))
             {
-                int idx = _placedItems.FindIndex(p => p.ID == id);
-                if (idx >= 0)
+                int targetIndex = _placedItems.FindIndex(p => p.ID == id);
+                if (targetIndex >= 0)
                 {
-                    _placedItems.RemoveAt(idx);
+                    _placedItems.RemoveAt(targetIndex);
                     return true;
                 }
                 return false;

@@ -13,7 +13,7 @@
     {
         public virtual BaseItem ItemData { get; set; }
         public string ID { get; private set; } = string.Empty;
-
+    
         [field: SerializeField] public RectTransform Rect { get; private set; } = default;
         [SerializeField] private Image _image = default;
         [SerializeField] private Image _rayImage = default;
@@ -42,9 +42,10 @@
             _startRotationCount = _rotationCount;
             transform.SetAsLastSibling();
 
-            if (_inventoryView.Inventory.TryGetPlacement(ID, out _placementItem))
+            if (_inventoryView.Inventory.TryGetPlacement(ID, out PlacementItem placementItem))
             {
-                _inventoryView.TryReleasePlacement(_placementItem);
+                _inventoryView.TryReleasePlacement(placementItem);
+                _placementItem = placementItem;
             }
 
             if (ItemData.IsRotatable)
@@ -83,24 +84,27 @@
                     Merge(overlappedItem, resultItem);
                 }
             }
-            
-            if (!_inventoryView.IsAvailablePlaceByCenter(_tempData.TryGetItemSize(), transform.position))
-            {
-                transform.SetParent(_startParent);
-                transform.position = _startPosition;
-                ApplyRotation(_startRotationCount);
-                _inventoryView.TryRestorePlacement(_placementItem);
-            }
             else
             {
-                if (!string.IsNullOrEmpty(_tempData.Id))
+                if (!_inventoryView.IsAvailablePlaceByCenter(_tempData.TryGetItemSize(), transform.position))
                 {
-                    ItemData = _tempData;
+                    transform.SetParent(_startParent);
+                    transform.position = _startPosition;
+                    ApplyRotation(_startRotationCount);
+                    _inventoryView.TryRestorePlacement(_placementItem);
                 }
-                _inventoryView.TryPlaceItem(this);
+                else
+                {
+                    if (!string.IsNullOrEmpty(_tempData.Id))
+                    {
+                        ItemData = _tempData;
+                    }
+                    _inventoryView.TryPlaceItem(this);
+                }
             }
             _image.color = Color.white;
             _tempData = default;
+            _placementItem = null;
         }
 
         #endregion

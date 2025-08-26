@@ -13,25 +13,27 @@ MonoBehaviour:
   m_Name: KatanaData
   m_EditorClassIdentifier: 
   <Item>k__BackingField:
+    <Grid>k__BackingField:
+      Rows:
+      - Columns: 01000000
+      - Columns: 02000000
+      - Columns: 01000000
     <Id>k__BackingField: 70150094196363841ba43508d166269a
     <Type>k__BackingField: 1
     <Level>k__BackingField: 1
     <UIPrefab>k__BackingField: {fileID: 1327997638166509237, guid: fd33a812688b0a941ae26b282e9adf6b, type: 3}
     <WorldPrefab>k__BackingField: {fileID: 0}
-    <Grid>k__BackingField:
-    - Values: 01000000
-    - Values: 02000000
-    - Values: 01000000
     <IsRotatable>k__BackingField: 1
     <IsMergable>k__BackingField: 1
     <EditorGrid>k__BackingField:
       _rows: 3
       _columns: 1
       _cellSize: 2
-      _grid:
-      - Values: 01000000
-      - Values: 02000000
-      - Values: 01000000
+      _matrixGrid:
+        Rows:
+        - Columns: 01000000
+        - Columns: 02000000
+        - Columns: 01000000
   <ItemDataView>k__BackingField:
     Name: 
     Level: 0

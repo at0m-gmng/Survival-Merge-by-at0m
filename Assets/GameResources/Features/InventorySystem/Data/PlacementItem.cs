@@ -1,6 +1,7 @@
 ﻿namespace GameResources.Features.InventorySystem.Data
 {
-    using EditorGridDrawled;
+    using System.Collections.Generic;
+    using Matrix;
     using UnityEngine;
 
     [System.Serializable]
@@ -8,6 +9,7 @@
     {
         public string ID;
         public Vector2Int ItemCenter;
-        public Wrapper<CellType>[] Shape;
+        public List<Vector2Int> PlacementCells = new List<Vector2Int>();
+        public Matrix Shape;
     }
 }
