@@ -670,6 +670,7 @@ MonoBehaviour:
   <GridLayoutRect>k__BackingField: {fileID: 1192976939}
   <ItemParent>k__BackingField: {fileID: 880168335}
   <OutsideParent>k__BackingField: {fileID: 529191073}
+  _cellOffset: 0.05
 --- !u!114 &1192976943
 MonoBehaviour:
   m_ObjectHideFlags: 0

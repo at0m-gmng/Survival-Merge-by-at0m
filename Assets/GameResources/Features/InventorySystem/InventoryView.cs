@@ -21,8 +21,9 @@
         [field: SerializeField] public RectTransform ItemParent { get; private set; }
         [field: SerializeField] public RectTransform OutsideParent { get; private set; }
 
+        [SerializeField] private float _cellOffset = 0.025f;
+        
         private readonly List<List<RectTransform>> _cellObjects = new();
-        private Dictionary<string, List<Vector2Int>> _busyCells = new Dictionary<string, List<Vector2Int>>();
         private Matrix _cellMatrix;
 
         #region UNITY_REGION
@@ -75,7 +76,7 @@
             Vector2 localItemPos = GridLayout.transform.InverseTransformPoint(worldPosition);
 
             int targetRow = -1, targetCol = -1;
-            float minDistSq = 0.025f * (GridLayout.cellSize.x * GridLayout.cellSize.x + GridLayout.cellSize.y * GridLayout.cellSize.y);
+            float minDistSq = _cellOffset * (GridLayout.cellSize.x * GridLayout.cellSize.x + GridLayout.cellSize.y * GridLayout.cellSize.y);
 
             for (int i = 0; i < _cellObjects.Count; i++)
             {
@@ -142,7 +143,7 @@
 
                 if (AreCellsInBounds(startItemRow, startItemCol, placement.Shape))
                 {
-                    ReleaseCells(placement.PlacementCells, startItemRow, startItemCol);
+                    ReleaseCells(placement.PlacementCells);
                     Inventory.TryRemovePlacement(placement.ID);
                     return true;
                 }
@@ -253,21 +254,11 @@
             }
         }
         
-        private void ReleaseCells(List<Vector2Int> placement, int posRow, int posCol)
+        private void ReleaseCells(List<Vector2Int> placement)
         {
             for (int k = 0; k < placement.Count; k++)
             {
-                for (int i = 0; i < _cellMatrix.Rows.Count; i++)
-                {
-                    for (int j = 0; j < _cellMatrix.Rows[i].Columns.Count; j++)
-                    {
-                        if (placement[k].x == i && placement[k].y == j)
-                        {
-                            _cellMatrix.Rows[i].Columns[j] = Matrix.EMPTY;
-                            break;
-                        }
-                    }
-                }
+                _cellMatrix.Rows[placement[k].x].Columns[placement[k].y] = Matrix.EMPTY;
             }
         }
         
